@@ -12,14 +12,17 @@
             --light-gray: #3a3a3a;
             --white: #f0f0f0;
             --accent: #9a7dff;
+            --accent-light: #c5b3ff;
             --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            --hewo-purple: #9a7dff;
+            --hewo-pink: #ff7de3;
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: 'Comic Neue', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
         }
 
         body {
@@ -31,6 +34,7 @@
             align-items: center;
             justify-content: center;
             padding: 2rem;
+            background-image: radial-gradient(circle at 10% 20%, var(--dark-gray) 0%, var(--black) 90%);
         }
 
         .container {
@@ -41,15 +45,29 @@
             box-shadow: var(--shadow);
             padding: 2rem;
             border: 1px solid var(--gray);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--hewo-purple), var(--hewo-pink));
         }
 
         h1 {
-            font-size: 1.8rem;
-            font-weight: 600;
+            font-size: 2rem;
+            font-weight: 700;
             margin-bottom: 1.5rem;
             text-align: center;
             letter-spacing: -0.5px;
-            color: var(--accent);
+            color: var(--accent-light);
+            text-shadow: 0 0 10px rgba(154, 125, 255, 0.3);
+            font-family: 'Comic Neue', cursive;
         }
 
         .display {
@@ -60,6 +78,7 @@
             text-align: center;
             color: var(--white);
             letter-spacing: -2px;
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.1);
         }
 
         .controls {
@@ -79,6 +98,24 @@
             transition: all 0.2s ease;
             background-color: var(--gray);
             color: var(--white);
+            position: relative;
+            overflow: hidden;
+        }
+
+        button::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.6s;
+        }
+
+        button:hover::after {
+            transform: translateX(100%);
         }
 
         button:active {
@@ -88,6 +125,7 @@
         button.primary {
             background-color: var(--accent);
             color: var(--black);
+            font-weight: 600;
         }
 
         button:disabled {
@@ -99,6 +137,12 @@
             margin-top: 2.5rem;
             border-top: 1px solid var(--gray);
             padding-top: 1.5rem;
+        }
+
+        .goal-section h2 {
+            color: var(--accent-light);
+            margin-bottom: 1rem;
+            font-family: 'Comic Neue', cursive;
         }
 
         .goal-form {
@@ -115,11 +159,13 @@
             font-size: 0.95rem;
             background-color: var(--dark-gray);
             color: var(--white);
+            transition: all 0.3s ease;
         }
 
         input:focus {
             outline: none;
             border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(154, 125, 255, 0.3);
         }
 
         .goal-list {
@@ -134,6 +180,11 @@
             margin-bottom: 0.5rem;
             border-radius: 8px;
             background-color: var(--gray);
+            transition: transform 0.2s ease;
+        }
+
+        .goal-item:hover {
+            transform: translateY(-2px);
         }
 
         .goal-info {
@@ -155,6 +206,28 @@
             margin-top: 2rem;
             max-height: 200px;
             overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: var(--accent) var(--dark-gray);
+        }
+
+        .laps h2 {
+            color: var(--accent-light);
+            margin-bottom: 1rem;
+            font-family: 'Comic Neue', cursive;
+        }
+
+        .laps::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .laps::-webkit-scrollbar-track {
+            background: var(--dark-gray);
+            border-radius: 3px;
+        }
+
+        .laps::-webkit-scrollbar-thumb {
+            background-color: var(--accent);
+            border-radius: 3px;
         }
 
         .lap-item {
@@ -164,6 +237,12 @@
             margin-bottom: 0.5rem;
             border-radius: 8px;
             background-color: var(--gray);
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .lap-number {
@@ -178,6 +257,17 @@
             color: var(--light-gray);
         }
 
+        .stats span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .stats span::before {
+            content: '•';
+            color: var(--accent);
+        }
+
         @media (max-width: 500px) {
             .container {
                 padding: 1.5rem;
@@ -187,12 +277,42 @@
                 font-size: 2.8rem;
             }
         }
+
+        /* HeWo character animation */
+        .hewo-char {
+            display: inline-block;
+            transition: transform 0.3s ease;
+        }
+
+        h1:hover .hewo-char {
+            animation: bounce 0.5s ease;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
     </style>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&family=Inter:wght@400;500;600&family=Space+Mono&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="container">
-        <h1>HeWo stopwatch</h1>
+        <h1 id="hewoTitle">
+            <span class="hewo-char">H</span>
+            <span class="hewo-char">e</span>
+            <span class="hewo-char">W</span>
+            <span class="hewo-char">o</span>
+            <span> </span>
+            <span class="hewo-char">s</span>
+            <span class="hewo-char">t</span>
+            <span class="hewo-char">o</span>
+            <span class="hewo-char">p</span>
+            <span class="hewo-char">w</span>
+            <span class="hewo-char">a</span>
+            <span class="hewo-char">t</span>
+            <span class="hewo-char">c</span>
+            <span class="hewo-char">h</span>
+        </h1>
         <div class="display" id="display">00:00.00</div>
         <div class="controls">
             <button class="primary" id="startBtn">Start</button>
@@ -229,6 +349,15 @@
         const addGoalBtn = document.getElementById('addGoalBtn');
         const goalList = document.getElementById('goalList');
         const stats = document.getElementById('stats');
+        const hewoTitle = document.getElementById('hewoTitle');
+
+        // Add bounce animation to title letters
+        hewoTitle.addEventListener('mouseover', () => {
+            const letters = document.querySelectorAll('.hewo-char');
+            letters.forEach((letter, index) => {
+                letter.style.animationDelay = `${index * 0.1}s`;
+            });
+        });
 
         // Stopwatch variables
         let startTime;
@@ -434,7 +563,8 @@
                 goalName.className = 'goal-name';
                 goalName.textContent = goal.name;
                 if (goal.name === activeGoal) {
-                    goalName.style.color = 'var(--accent)';
+                    goalName.style.color = 'var(--accent-light)';
+                    goalName.style.textShadow = '0 0 8px rgba(154, 125, 255, 0.3)';
                 }
                 
                 const goalTime = document.createElement('span');
