@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Noir Chrono</title>
+    <style>
+        :root {
+            --black: #0a0a0a;
+            --dark-gray: #1a1a1a;
+            --gray: #2a2a2a;
+            --light-gray: #3a3a3a;
+            --white: #f0f0f0;
+            --accent: #9a7dff;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background-color: var(--black);
+            color: var(--white);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+            background-color: var(--dark-gray);
+            border-radius: 1rem;
+            box-shadow: var(--shadow);
+            padding: 2rem;
+            border: 1px solid var(--gray);
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            letter-spacing: -0.5px;
+            color: var(--accent);
+        }
+
+        .display {
+            font-size: 3.5rem;
+            font-weight: 300;
+            font-family: 'Space Mono', monospace;
+            margin: 2rem 0;
+            text-align: center;
+            color: var(--white);
+            letter-spacing: -2px;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.8rem;
+            margin-bottom: 2rem;
+        }
+
+        button {
+            border: none;
+            border-radius: 100px;
+            padding: 0.8rem;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background-color: var(--gray);
+            color: var(--white);
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        button.primary {
+            background-color: var(--accent);
+            color: var(--black);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .goal-section {
+            margin-top: 2.5rem;
+            border-top: 1px solid var(--gray);
+            padding-top: 1.5rem;
+        }
+
+        .goal-form {
+            display: flex;
+            gap: 0.8rem;
+            margin-bottom: 1.5rem;
+        }
+
+        input {
+            flex: 1;
+            padding: 0.8rem 1rem;
+            border: 1px solid var(--gray);
+            border-radius: 100px;
+            font-size: 0.95rem;
+            background-color: var(--dark-gray);
+            color: var(--white);
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .goal-list {
+            margin-top: 1.5rem;
+        }
+
+        .goal-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 8px;
+            background-color: var(--gray);
+        }
+
+        .goal-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .goal-name {
+            font-weight: 500;
+        }
+
+        .goal-time {
+            font-size: 0.85rem;
+            color: var(--light-gray);
+            margin-top: 0.2rem;
+        }
+
+        .laps {
+            margin-top: 2rem;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .lap-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.8rem;
+            margin-bottom: 0.5rem;
+            border-radius: 8px;
+            background-color: var(--gray);
+        }
+
+        .lap-number {
+            font-weight: 500;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+            color: var(--light-gray);
+        }
+
+        @media (max-width: 500px) {
+            .container {
+                padding: 1.5rem;
+            }
+
+            .display {
+                font-size: 2.8rem;
+            }
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Mono&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <h1>Noir Chrono</h1>
+        <div class="display" id="display">00:00.00</div>
+        <div class="controls">
+            <button class="primary" id="startBtn">Start</button>
+            <button id="stopBtn" disabled>Stop</button>
+            <button id="lapBtn" disabled>Lap</button>
+            <button id="resetBtn" disabled>Reset</button>
+        </div>
+
+        <div class="goal-section">
+            <h2>Goal Tracker</h2>
+            <div class="goal-form">
+                <input type="text" id="goalInput" placeholder="Enter goal name">
+                <button class="primary" id="addGoalBtn">Add</button>
+            </div>
+            <div class="goal-list" id="goalList"></div>
+        </div>
+
+        <div class="laps" id="lapsContainer">
+            <h2>Laps</h2>
+            <div id="lapsList"></div>
+            <div class="stats" id="stats"></div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const display = document.getElementById('display');
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const lapBtn = document.getElementById('lapBtn');
+        const lapsList = document.getElementById('lapsList');
+        const goalInput = document.getElementById('goalInput');
+        const addGoalBtn = document.getElementById('addGoalBtn');
+        const goalList = document.getElementById('goalList');
+        const stats = document.getElementById('stats');
+
+        // Stopwatch variables
+        let startTime;
+        let elapsedTime = 0;
+        let timerInterval;
+        let isRunning = false;
+        let lapTimes = [];
+        let currentGoals = [];
+        let activeGoal = null;
+        let goalStartTime = 0;
+        let totalGoalTime = 0;
+
+        // Format time (MM:SS.ms)
+        function formatTime(timeInMilliseconds) {
+            const date = new Date(timeInMilliseconds);
+            const minutes = date.getUTCMinutes().toString().padStart(2, '0');
+            const seconds = date.getUTCSeconds().toString().padStart(2, '0');
+            const milliseconds = Math.floor(date.getUTCMilliseconds() / 10).toString().padStart(2, '0');
+            return `${minutes}:${seconds}.${milliseconds}`;
+        }
+
+        // Format long time (HH:MM:SS)
+        function formatLongTime(timeInMilliseconds) {
+            const date = new Date(timeInMilliseconds);
+            const hours = date.getUTCHours().toString().padStart(2, '0');
+            const minutes = date.getUTCMinutes().toString().padStart(2, '0');
+            const seconds = date.getUTCSeconds().toString().padStart(2, '0');
+            return `${hours}:${minutes}:${seconds}`;
+        }
+
+        // Update display
+        function updateDisplay() {
+            display.textContent = formatTime(elapsedTime);
+        }
+
+        // Start stopwatch
+        function start() {
+            if (!isRunning) {
+                startTime = Date.now() - elapsedTime;
+                timerInterval = setInterval(() => {
+                    elapsedTime = Date.now() - startTime;
+                    updateDisplay();
+                    
+                    if (activeGoal) {
+                        const goal = currentGoals.find(g => g.name === activeGoal);
+                        if (goal) {
+                            goal.timeSpent = totalGoalTime + (elapsedTime - goalStartTime);
+                            updateGoalList();
+                        }
+                    }
+                }, 10);
+                isRunning = true;
+                
+                startBtn.disabled = true;
+                stopBtn.disabled = false;
+                resetBtn.disabled = true;
+                lapBtn.disabled = false;
+                
+                if (activeGoal) {
+                    goalStartTime = elapsedTime;
+                }
+            }
+        }
+
+        // Stop stopwatch
+        function stop() {
+            if (isRunning) {
+                clearInterval(timerInterval);
+                isRunning = false;
+                
+                startBtn.disabled = false;
+                stopBtn.disabled = true;
+                resetBtn.disabled = false;
+                lapBtn.disabled = true;
+                
+                if (activeGoal) {
+                    totalGoalTime += elapsedTime - goalStartTime;
+                    const goal = currentGoals.find(g => g.name === activeGoal);
+                    if (goal) {
+                        goal.timeSpent = totalGoalTime;
+                        updateGoalList();
+                    }
+                }
+            }
+        }
+
+        // Reset stopwatch
+        function reset() {
+            stop();
+            elapsedTime = 0;
+            updateDisplay();
+            lapTimes = [];
+            lapsList.innerHTML = '';
+            stats.innerHTML = '';
+            resetBtn.disabled = true;
+            
+            if (activeGoal) {
+                totalGoalTime = 0;
+                const goal = currentGoals.find(g => g.name === activeGoal);
+                if (goal) {
+                    goal.timeSpent = 0;
+                    updateGoalList();
+                }
+            }
+        }
+
+        // Record lap
+        function recordLap() {
+            if (isRunning) {
+                const lapTime = elapsedTime;
+                const previousLapTime = lapTimes.length > 0 ? lapTime - lapTimes[lapTimes.length - 1].total : lapTime;
+                lapTimes.push({
+                    lap: lapTimes.length + 1,
+                    time: previousLapTime,
+                    total: lapTime
+                });
+                updateLapsList();
+            }
+        }
+
+        // Update laps list
+        function updateLapsList() {
+            if (lapTimes.length === 0) return;
+            
+            lapsList.innerHTML = '';
+            
+            lapTimes.forEach(lap => {
+                const lapItem = document.createElement('div');
+                lapItem.className = 'lap-item';
+                
+                const lapNumber = document.createElement('span');
+                lapNumber.className = 'lap-number';
+                lapNumber.textContent = `Lap ${lap.lap}`;
+                
+                const lapTime = document.createElement('span');
+                lapTime.textContent = formatTime(lap.time);
+                
+                lapItem.appendChild(lapNumber);
+                lapItem.appendChild(lapTime);
+                lapsList.appendChild(lapItem);
+            });
+            
+            if (lapTimes.length > 1) {
+                const lapTimesOnly = lapTimes.map(lap => lap.time);
+                const fastestLap = Math.min(...lapTimesOnly.slice(1));
+                const slowestLap = Math.max(...lapTimesOnly.slice(1));
+                
+                stats.innerHTML = `
+                    <span>Laps: ${lapTimes.length}</span>
+                    <span>Fastest: ${formatTime(fastestLap)}</span>
+                    <span>Slowest: ${formatTime(slowestLap)}</span>
+                `;
+            }
+            
+            lapsList.scrollTop = lapsList.scrollHeight;
+        }
+
+        // Add goal
+        function addGoal() {
+            const goalName = goalInput.value.trim();
+            if (!goalName) return;
+            
+            if (!currentGoals.some(g => g.name === goalName)) {
+                currentGoals.push({
+                    name: goalName,
+                    timeSpent: 0
+                });
+                
+                goalInput.value = '';
+                updateGoalList();
+            }
+        }
+
+        // Set active goal
+        function setActiveGoal(goalName) {
+            if (isRunning && activeGoal) {
+                totalGoalTime += elapsedTime - goalStartTime;
+            }
+            
+            activeGoal = goalName;
+            
+            if (isRunning) {
+                goalStartTime = elapsedTime;
+            } else {
+                totalGoalTime = 0;
+            }
+            
+            updateGoalList();
+        }
+
+        // Update goal list
+        function updateGoalList() {
+            goalList.innerHTML = '';
+            
+            currentGoals.forEach(goal => {
+                const goalItem = document.createElement('div');
+                goalItem.className = 'goal-item';
+                
+                const goalInfo = document.createElement('div');
+                goalInfo.className = 'goal-info';
+                
+                const goalName = document.createElement('span');
+                goalName.className = 'goal-name';
+                goalName.textContent = goal.name;
+                if (goal.name === activeGoal) {
+                    goalName.style.color = 'var(--accent)';
+                }
+                
+                const goalTime = document.createElement('span');
+                goalTime.className = 'goal-time';
+                goalTime.textContent = `Time spent: ${formatLongTime(goal.timeSpent)}`;
+                
+                goalInfo.appendChild(goalName);
+                goalInfo.appendChild(goalTime);
+                
+                const goalAction = document.createElement('button');
+                goalAction.textContent = goal.name === activeGoal ? 'Tracking' : 'Track';
+                goalAction.style.fontSize = '0.8rem';
+                goalAction.style.padding = '0.4rem 0.8rem';
+                if (goal.name === activeGoal) {
+                    goalAction.classList.add('primary');
+                }
+                
+                goalAction.addEventListener('click', () => setActiveGoal(goal.name));
+                
+                goalItem.appendChild(goalInfo);
+                goalItem.appendChild(goalAction);
+                goalList.appendChild(goalItem);
+            });
+        }
+
+        // Event listeners
+        startBtn.addEventListener('click', start);
+        stopBtn.addEventListener('click', stop);
+        resetBtn.addEventListener('click', reset);
+        lapBtn.addEventListener('click', recordLap);
+        addGoalBtn.addEventListener('click', addGoal);
+        goalInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addGoal();
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                if (isRunning) {
+                    stop();
+                } else {
+                    start();
+                }
+            } else if (e.code === 'KeyL' && isRunning) {
+                recordLap();
+            } else if (e.code === 'KeyR' && !isRunning && elapsedTime > 0) {
+                reset();
+            }
+        });
+    </script>
+</body>
+</html>
